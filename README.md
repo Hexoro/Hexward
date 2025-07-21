@@ -1,73 +1,60 @@
-# Welcome to your Lovable project
+# HexWard
 
-## Project info
+**HexWard** is an AI-powered real-time hospital assistant and monitoring system designed to enhance patient care, staff efficiency, and medical response.
 
-**URL**: https://lovable.dev/projects/97b811e3-17c4-4958-8e35-975f05a659a5
+---
 
-## How can I edit this code?
+## 🧠 What is HexWard?
 
-There are several ways of editing your application.
+HexWard acts as a centralized control system that intelligently observes and manages hospital environments using computer vision, audio analysis, and language processing. It continuously monitors patient activity, detects critical events, records key interactions, and summarizes medical information in an easy-to-understand format for healthcare professionals.
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/97b811e3-17c4-4958-8e35-975f05a659a5) and start prompting.
+## 🔍 What Does HexWard Do?
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Real-Time Monitoring**  
+  Tracks patients and staff using live camera feeds and audio input to detect presence, movement, and interactions in various rooms (wards, ICUs, waiting areas, etc.).
 
-**Use your preferred IDE**
+- **Action & Behavior Recognition**  
+  Automatically recognizes key events such as medication handoffs, patient falls, distress signals, or abnormal inactivity.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Patient Symptom Intake**  
+  Allows patients in waiting areas to submit symptoms through a conversational interface, generating initial records for medical staff.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Automated Health Record Logging**  
+  Creates and maintains lightweight patient files containing symptom timelines, movement history, actions taken, and more.
 
-Follow these steps:
+- **AI-Generated Medical Summaries**  
+  Periodically generates clear, concise summaries of each patient’s status based on their activity, interactions, and treatment history.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **Medication Tracking & Alerts**  
+  Logs when medications are administered and schedules reminders for next doses, highlighting missed treatments or urgent needs.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- **Emergency Detection**  
+  Identifies dangerous scenarios (e.g., sudden collapse, distress calls) and pushes instant alerts to staff members.
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **Visual & Data Dashboard**  
+  Displays patient status, room activity, alerts, and AI summaries in a real-time web-based interface for doctors and nurses.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- **Analytics & Insights**  
+  Provides behavioral patterns, response timelines, and health trends to support proactive medical decisions.
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🔒 Built for Privacy & Efficiency
 
-**Use GitHub Codespaces**
+HexWard is designed to function within local networks, making it ideal for on-premise hospital use. It minimizes manual workload, enhances visibility into critical areas, and ensures rapid response through intelligent automation.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 📌 Use Cases
 
-This project is built with:
+- Emergency rooms
+- ICUs and surgical wards
+- Waiting areas
+- Elderly care centers
+- Smart clinics and outpatient monitoring
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/97b811e3-17c4-4958-8e35-975f05a659a5) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+*HexWard is part of the Hexoro ecosystem — enabling intelligent, modular solutions for next-generation healthcare environments.*
