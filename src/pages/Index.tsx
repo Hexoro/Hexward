@@ -8,6 +8,8 @@ import OverviewPage from "@/components/OverviewPage";
 import PatientsPage from "@/components/PatientsPage";
 import LiveFeedsPage from "@/components/LiveFeedsPage";
 import AlertsPage from "@/components/AlertsPage";
+import ReportsPage from "@/components/ReportsPage";
+import SettingsPage from "@/components/SettingsPage";
 import LoginPage from "@/components/LoginPage";
 
 type UserRole = 'doctor' | 'nurse' | 'admin';
@@ -38,17 +40,9 @@ const Index = () => {
       case 'alerts':
         return <AlertsPage />;
       case 'reports':
-        return (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Reports page coming soon...</p>
-          </div>
-        );
+        return <ReportsPage />;
       case 'settings':
-        return (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Settings page coming soon...</p>
-          </div>
-        );
+        return <SettingsPage />;
       default:
         return <OverviewPage />;
     }

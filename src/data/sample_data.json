@@ -1,0 +1,238 @@
+{
+  "patients": [
+    {
+      "id": "1",
+      "name": "John Smith",
+      "age": 45,
+      "room": "ICU-001",
+      "status": "critical",
+      "admissionDate": "2024-01-15T08:30:00Z",
+      "lastUpdate": "10 min ago",
+      "conditions": ["Heart Surgery", "Hypertension"],
+      "vitals": {
+        "heartRate": 85,
+        "bloodPressure": "140/90",
+        "temperature": 99.2,
+        "oxygenSat": 96
+      },
+      "aiSummary": "Patient showing stable vital signs post-surgery. Monitoring for cardiac recovery. Blood pressure slightly elevated but within expected range for post-operative state."
+    },
+    {
+      "id": "2",
+      "name": "Maria Garcia",
+      "age": 32,
+      "room": "ER-001",
+      "status": "critical",
+      "admissionDate": "2024-01-22T14:20:00Z",
+      "lastUpdate": "5 min ago",
+      "conditions": ["Pneumonia", "Respiratory Distress"],
+      "vitals": {
+        "heartRate": 110,
+        "bloodPressure": "130/85",
+        "temperature": 101.5,
+        "oxygenSat": 92
+      },
+      "aiSummary": "Patient requires immediate attention. Oxygen saturation below normal. Responding to treatment but needs continuous monitoring."
+    },
+    {
+      "id": "3",
+      "name": "Robert Johnson",
+      "age": 67,
+      "room": "WARD-101",
+      "status": "stable",
+      "admissionDate": "2024-01-20T10:15:00Z",
+      "lastUpdate": "15 min ago",
+      "conditions": ["Diabetes", "Recovery"],
+      "vitals": {
+        "heartRate": 72,
+        "bloodPressure": "125/80",
+        "temperature": 98.6,
+        "oxygenSat": 98
+      },
+      "aiSummary": "Stable condition. Diabetes well-controlled. Patient is responsive and showing good progress toward discharge."
+    }
+  ],
+  "cameras": [
+    {
+      "id": "ICU-001",
+      "name": "ICU Room 1",
+      "room": "ICU-001",
+      "status": "active",
+      "patients": 2,
+      "lastUpdate": "2024-01-22T15:30:00Z",
+      "recording": true,
+      "detectionEnabled": true
+    },
+    {
+      "id": "ICU-002",
+      "name": "ICU Room 2",
+      "room": "ICU-002",
+      "status": "active",
+      "patients": 1,
+      "lastUpdate": "2024-01-22T15:29:00Z",
+      "recording": true,
+      "detectionEnabled": true
+    },
+    {
+      "id": "ER-001",
+      "name": "Emergency Room 1",
+      "room": "ER-001",
+      "status": "critical",
+      "patients": 3,
+      "lastUpdate": "2024-01-22T15:31:00Z",
+      "recording": true,
+      "detectionEnabled": true
+    },
+    {
+      "id": "WARD-101",
+      "name": "General Ward 101",
+      "room": "WARD-101",
+      "status": "active",
+      "patients": 4,
+      "lastUpdate": "2024-01-22T15:28:00Z",
+      "recording": false,
+      "detectionEnabled": true
+    }
+  ],
+  "alerts": [
+    {
+      "id": "1",
+      "type": "critical",
+      "title": "Patient Fall Detected",
+      "message": "Motion sensors detected a sudden fall in ICU-001. Patient John Smith requires immediate attention.",
+      "timestamp": "2024-01-22T15:28:00Z",
+      "room": "ICU-001",
+      "patientId": "1",
+      "patient": "John Smith",
+      "acknowledged": false,
+      "priority": 1,
+      "source": "AI Detection"
+    },
+    {
+      "id": "2",
+      "type": "critical",
+      "title": "Vital Signs Critical",
+      "message": "Heart rate dropped below threshold (45 bpm) for Maria Garcia in ER-001.",
+      "timestamp": "2024-01-22T15:22:00Z",
+      "room": "ER-001",
+      "patientId": "2",
+      "patient": "Maria Garcia",
+      "acknowledged": false,
+      "priority": 1,
+      "source": "Vital Monitors"
+    },
+    {
+      "id": "3",
+      "type": "warning",
+      "title": "Medication Overdue",
+      "message": "Scheduled medication for 14:00 has not been administered to Robert Johnson.",
+      "timestamp": "2024-01-22T15:15:00Z",
+      "room": "WARD-101",
+      "patientId": "3",
+      "patient": "Robert Johnson",
+      "acknowledged": true,
+      "priority": 2,
+      "source": "Medication System"
+    },
+    {
+      "id": "4",
+      "type": "info",
+      "title": "Visitor Check-in",
+      "message": "Authorized visitor registered at main desk for Robert Johnson.",
+      "timestamp": "2024-01-22T14:45:00Z",
+      "room": "WARD-101",
+      "patientId": "3",
+      "patient": "Robert Johnson",
+      "acknowledged": true,
+      "priority": 3,
+      "source": "Security System"
+    }
+  ],
+  "events": [
+    {
+      "id": "1",
+      "patientId": "1",
+      "type": "vitals_check",
+      "description": "Vital signs recorded",
+      "timestamp": "2024-01-22T15:00:00Z",
+      "source": "nurse",
+      "metadata": {
+        "heartRate": 85,
+        "bloodPressure": "140/90",
+        "temperature": 99.2,
+        "oxygenSat": 96
+      }
+    },
+    {
+      "id": "2",
+      "patientId": "1",
+      "type": "medication",
+      "description": "Pain medication administered",
+      "timestamp": "2024-01-22T14:30:00Z",
+      "source": "nurse",
+      "metadata": {
+        "medication": "Morphine",
+        "dosage": "5mg",
+        "route": "IV"
+      }
+    },
+    {
+      "id": "3",
+      "patientId": "2",
+      "type": "treatment",
+      "description": "Oxygen therapy initiated",
+      "timestamp": "2024-01-22T14:25:00Z",
+      "source": "doctor",
+      "metadata": {
+        "oxygenFlow": "4L/min",
+        "method": "nasal_cannula"
+      }
+    },
+    {
+      "id": "4",
+      "patientId": "3",
+      "type": "movement",
+      "description": "Patient sitting up in bed",
+      "timestamp": "2024-01-22T13:45:00Z",
+      "source": "camera",
+      "confidence": 0.95,
+      "metadata": {
+        "activity": "sitting_up",
+        "duration": "15_minutes"
+      }
+    }
+  ],
+  "systemStatus": {
+    "timestamp": "2024-01-22T15:30:00Z",
+    "services": {
+      "aiMonitor": {
+        "running": true,
+        "detectionsCount": 147,
+        "lastAnalysis": "2024-01-22T15:29:30Z"
+      },
+      "cameraService": {
+        "running": true,
+        "activeCameras": 12,
+        "totalCameras": 14
+      },
+      "gptService": {
+        "available": true,
+        "lastSummary": "2024-01-22T15:00:00Z"
+      }
+    },
+    "hospital": {
+      "name": "HexWard General Hospital",
+      "timezone": "UTC-5"
+    }
+  },
+  "analytics": {
+    "patientCount": 25,
+    "alertCount": 8,
+    "cameraCount": 14,
+    "responseTime": "2.3min",
+    "trends": {
+      "alertsLast7Days": [4, 6, 3, 8, 5, 7, 8],
+      "patientsLast7Days": [22, 24, 23, 25, 26, 24, 25]
+    }
+  }
+}
