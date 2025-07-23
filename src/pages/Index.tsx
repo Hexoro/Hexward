@@ -1,8 +1,9 @@
 /**
  * HexWard - AI Hospital Monitoring Dashboard
- * Main application entry point with authentication and routing
+ * Main application entry point with secure routing
  */
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import OverviewPage from "@/components/OverviewPage";
 import PatientsPage from "@/components/PatientsPage";
@@ -10,24 +11,28 @@ import LiveFeedsPage from "@/components/LiveFeedsPage";
 import AlertsPage from "@/components/AlertsPage";
 import ReportsPage from "@/components/ReportsPage";
 import SettingsPage from "@/components/SettingsPage";
-import LoginPage from "@/components/LoginPage";
+import { Loader2 } from "lucide-react";
 
-type UserRole = 'doctor' | 'nurse' | 'admin';
 type Page = 'overview' | 'patients' | 'feeds' | 'alerts' | 'reports' | 'settings';
 
 const Index = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<UserRole>('doctor');
+  const { profile, loading } = useAuth();
   const [currentPage, setCurrentPage] = useState<Page>('overview');
-
-  const handleLogin = (role: UserRole) => {
-    setUserRole(role);
-    setIsAuthenticated(true);
-  };
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page as Page);
   };
+
+  if (loading || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderPage = () => {
     switch (currentPage) {
@@ -48,15 +53,11 @@ const Index = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
-  }
-
   return (
     <DashboardLayout
       currentPage={currentPage}
       onNavigate={handleNavigate}
-      userRole={userRole}
+      userRole={profile.role as 'doctor' | 'nurse' | 'admin'}
     >
       {renderPage()}
     </DashboardLayout>

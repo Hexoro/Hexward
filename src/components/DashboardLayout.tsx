@@ -2,6 +2,7 @@
  * Main dashboard layout with sidebar navigation
  */
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Activity, 
   Users, 
@@ -12,7 +13,8 @@ import {
   Menu,
   Shield,
   Heart,
-  Eye
+  Eye,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -39,6 +41,7 @@ const roleColors = {
 };
 
 export default function DashboardLayout({ children, currentPage, onNavigate, userRole }: DashboardLayoutProps) {
+  const { profile, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const filteredNavigation = navigation.filter(item => item.roles.includes(userRole));
@@ -77,7 +80,9 @@ export default function DashboardLayout({ children, currentPage, onNavigate, use
             </div>
             {sidebarOpen && (
               <div>
-                <p className="text-sm font-medium text-sidebar-foreground">Dr. Sarah Chen</p>
+                <p className="text-sm font-medium text-sidebar-foreground">
+                  {profile?.full_name || profile?.username || 'User'}
+                </p>
                 <p className="text-xs text-sidebar-foreground/70 capitalize">{userRole}</p>
               </div>
             )}
@@ -100,9 +105,9 @@ export default function DashboardLayout({ children, currentPage, onNavigate, use
           </div>
         </nav>
 
-        {/* Quick Stats */}
+        {/* Quick Stats & Sign Out */}
         {sidebarOpen && (
-          <div className="p-4 border-t border-sidebar-border">
+          <div className="p-4 border-t border-sidebar-border space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-sidebar-foreground/70">Active Patients</span>
@@ -117,6 +122,28 @@ export default function DashboardLayout({ children, currentPage, onNavigate, use
                 <span className="text-success font-medium">12</span>
               </div>
             </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={signOut}
+              className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        )}
+        
+        {!sidebarOpen && (
+          <div className="p-4 border-t border-sidebar-border">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={signOut}
+              className="w-full justify-center text-sidebar-foreground hover:bg-sidebar-accent"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
         )}
       </div>
