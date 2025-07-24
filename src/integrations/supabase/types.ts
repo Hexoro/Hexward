@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string | null
+          id: string
+          message: string
+          notes: string | null
+          patient_id: string | null
+          priority: number | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          room: string
+          title: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          notes?: string | null
+          patient_id?: string | null
+          priority?: number | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          room: string
+          title: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          notes?: string | null
+          patient_id?: string | null
+          priority?: number | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          room?: string
+          title?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -47,6 +112,48 @@ export type Database = {
           resource_type?: string
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      camera_feeds: {
+        Row: {
+          ai_monitoring_enabled: boolean | null
+          camera_id: string
+          created_at: string | null
+          id: string
+          last_motion_detected: string | null
+          name: string
+          recording: boolean | null
+          room: string
+          status: string
+          stream_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_monitoring_enabled?: boolean | null
+          camera_id: string
+          created_at?: string | null
+          id?: string
+          last_motion_detected?: string | null
+          name: string
+          recording?: boolean | null
+          room: string
+          status?: string
+          stream_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_monitoring_enabled?: boolean | null
+          camera_id?: string
+          created_at?: string | null
+          id?: string
+          last_motion_detected?: string | null
+          name?: string
+          recording?: boolean | null
+          room?: string
+          status?: string
+          stream_url?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -90,28 +197,43 @@ export type Database = {
       }
       patients: {
         Row: {
+          admission_date: string | null
+          age: number | null
+          conditions: string[] | null
           created_at: string | null
           id: string
           name: string
+          notes: string | null
           room: string | null
           status: string | null
           summary: string | null
+          vitals: Json | null
         }
         Insert: {
+          admission_date?: string | null
+          age?: number | null
+          conditions?: string[] | null
           created_at?: string | null
           id: string
           name: string
+          notes?: string | null
           room?: string | null
           status?: string | null
           summary?: string | null
+          vitals?: Json | null
         }
         Update: {
+          admission_date?: string | null
+          age?: number | null
+          conditions?: string[] | null
           created_at?: string | null
           id?: string
           name?: string
+          notes?: string | null
           room?: string | null
           status?: string | null
           summary?: string | null
+          vitals?: Json | null
         }
         Relationships: []
       }
