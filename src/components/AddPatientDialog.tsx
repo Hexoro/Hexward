@@ -57,7 +57,7 @@ export default function AddPatientDialog({ onPatientAdded }: AddPatientDialogPro
           vitals: vitals,
           notes: formData.notes,
           summary: ''
-        });
+        } as any);
 
       if (error) throw error;
 
