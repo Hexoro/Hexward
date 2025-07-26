@@ -273,6 +273,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string | null
+          data: Json | null
+          description: string | null
+          generated_by: string | null
+          id: string
+          report_type: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data?: Json | null
+          description?: string | null
+          generated_by?: string | null
+          id?: string
+          report_type: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data?: Json | null
+          description?: string | null
+          generated_by?: string | null
+          id?: string
+          report_type?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       security_settings: {
         Row: {
           created_at: string | null
