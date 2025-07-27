@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_detections: {
+        Row: {
+          alert_generated: boolean | null
+          bounding_box: Json | null
+          camera_id: string
+          confidence: number
+          detection_type: string
+          gpt_analysis: string | null
+          id: string
+          metadata: Json | null
+          processed_by_gpt: boolean | null
+          room: string
+          timestamp: string
+        }
+        Insert: {
+          alert_generated?: boolean | null
+          bounding_box?: Json | null
+          camera_id: string
+          confidence: number
+          detection_type: string
+          gpt_analysis?: string | null
+          id?: string
+          metadata?: Json | null
+          processed_by_gpt?: boolean | null
+          room: string
+          timestamp?: string
+        }
+        Update: {
+          alert_generated?: boolean | null
+          bounding_box?: Json | null
+          camera_id?: string
+          confidence?: number
+          detection_type?: string
+          gpt_analysis?: string | null
+          id?: string
+          metadata?: Json | null
+          processed_by_gpt?: boolean | null
+          room?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
       alerts: {
         Row: {
           acknowledged: boolean | null
@@ -157,6 +199,69 @@ export type Database = {
         }
         Relationships: []
       }
+      consultations: {
+        Row: {
+          created_at: string
+          diagnosis: string | null
+          doctor_id: string | null
+          end_time: string | null
+          id: string
+          notes: string | null
+          patient_id: string | null
+          recording_url: string | null
+          start_time: string
+          status: string
+          treatment_plan: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          diagnosis?: string | null
+          doctor_id?: string | null
+          end_time?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          recording_url?: string | null
+          start_time: string
+          status?: string
+          treatment_plan?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          diagnosis?: string | null
+          doctor_id?: string | null
+          end_time?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          recording_url?: string | null
+          start_time?: string
+          status?: string
+          treatment_plan?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           action: string
@@ -191,6 +296,48 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_vitals_history: {
+        Row: {
+          id: string
+          patient_id: string | null
+          recorded_by: string | null
+          source: string | null
+          timestamp: string
+          vitals: Json
+        }
+        Insert: {
+          id?: string
+          patient_id?: string | null
+          recorded_by?: string | null
+          source?: string | null
+          timestamp?: string
+          vitals: Json
+        }
+        Update: {
+          id?: string
+          patient_id?: string | null
+          recorded_by?: string | null
+          source?: string | null
+          timestamp?: string
+          vitals?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_vitals_history_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_vitals_history_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -236,6 +383,73 @@ export type Database = {
           vitals?: Json | null
         }
         Relationships: []
+      }
+      prescriptions: {
+        Row: {
+          consultation_id: string | null
+          created_at: string
+          doctor_id: string | null
+          dosage: string
+          duration: string | null
+          frequency: string
+          id: string
+          instructions: string | null
+          medication_name: string
+          patient_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          consultation_id?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          dosage: string
+          duration?: string | null
+          frequency: string
+          id?: string
+          instructions?: string | null
+          medication_name: string
+          patient_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          consultation_id?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          dosage?: string
+          duration?: string | null
+          frequency?: string
+          id?: string
+          instructions?: string | null
+          medication_name?: string
+          patient_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -365,6 +579,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      video_sessions: {
+        Row: {
+          consultation_id: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          participants: Json | null
+          recording_enabled: boolean | null
+          recording_url: string | null
+          session_id: string
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          consultation_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          participants?: Json | null
+          recording_enabled?: boolean | null
+          recording_url?: string | null
+          session_id: string
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          consultation_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          participants?: Json | null
+          recording_enabled?: boolean | null
+          recording_url?: string | null
+          session_id?: string
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_sessions_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
