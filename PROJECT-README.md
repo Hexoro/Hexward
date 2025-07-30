@@ -21,7 +21,7 @@ This system demonstrates how AI can enhance:
 - **Cost Reduction** - Proactive intervention and resource optimization
 
 **📞 Interested in a custom solution for your hospital?**  
-**Contact:** [your-email@domain.com]  
+**Contact:** ahmad.hussain.a301@gmail.com 
 **We specialize in tailoring AI monitoring systems to specific hospital needs and workflows.**
 
 ---
@@ -337,11 +337,6 @@ cd backend && python -m pytest
 - Staff training and implementation support
 - Ongoing maintenance and feature development
 
-### 📞 **Get in Touch**
-- **Email**: [your-email@domain.com]
-- **Demo Request**: Schedule a personalized demonstration
-- **Consultation**: Free initial assessment of your needs
-- **Pilot Program**: Small-scale implementation testing
 
 ---
 
