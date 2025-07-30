@@ -365,6 +365,7 @@ cd backend && python -m pytest
 - Feature enhancement
 - Staff feedback integration
 - System scaling
+- Add Rasberry Pi mini camera support
 
 ---
 
