@@ -349,6 +349,7 @@ export type Database = {
           conditions: string[] | null
           created_at: string | null
           id: string
+          image_url: string | null
           name: string
           notes: string | null
           room: string | null
@@ -362,6 +363,7 @@ export type Database = {
           conditions?: string[] | null
           created_at?: string | null
           id: string
+          image_url?: string | null
           name: string
           notes?: string | null
           room?: string | null
@@ -375,6 +377,7 @@ export type Database = {
           conditions?: string[] | null
           created_at?: string | null
           id?: string
+          image_url?: string | null
           name?: string
           notes?: string | null
           room?: string | null

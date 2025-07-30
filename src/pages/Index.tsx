@@ -53,11 +53,18 @@ const Index = () => {
     }
   };
 
+  // Map role types for DashboardLayout
+  const getMappedRole = (role: string): 'doctor' | 'nurse' | 'admin' => {
+    if (role === 'admin') return 'admin';
+    if (role === 'remote_doctor') return 'doctor';
+    return 'nurse';
+  };
+
   return (
     <DashboardLayout
       currentPage={currentPage}
       onNavigate={handleNavigate}
-      userRole={profile.role as 'doctor' | 'nurse' | 'admin'}
+      userRole={getMappedRole(profile.role)}
     >
       {renderPage()}
     </DashboardLayout>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, User, Calendar, MapPin, Activity } from "lucide-react";
+import { Plus, User, Calendar, MapPin, Activity, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,8 @@ interface AddPatientDialogProps {
 export default function AddPatientDialog({ onPatientAdded }: AddPatientDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -28,6 +30,52 @@ export default function AddPatientDialog({ onPatientAdded }: AddPatientDialogPro
     oxygenSat: '',
     notes: ''
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview('');
+  };
+
+  const uploadPatientImage = async (patientId: string): Promise<string | null> => {
+    if (!imageFile) return null;
+
+    try {
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${patientId}.${fileExt}`;
+      const filePath = `patients/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('patient-images')
+        .upload(filePath, imageFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('patient-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload patient image');
+      return null;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +94,8 @@ export default function AddPatientDialog({ onPatientAdded }: AddPatientDialogPro
         oxygenSat: parseInt(formData.oxygenSat) || 0
       };
 
-      const { error } = await supabase
+      // Create patient first
+      const { data: patient, error } = await supabase
         .from('patients')
         .insert({
           name: formData.name,
@@ -57,9 +106,27 @@ export default function AddPatientDialog({ onPatientAdded }: AddPatientDialogPro
           vitals: vitals,
           notes: formData.notes,
           summary: ''
-        } as any);
+        } as any)
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Upload image if provided
+      let imageUrl = null;
+      if (imageFile && patient) {
+        imageUrl = await uploadPatientImage(patient.id);
+        
+        // Update patient with image URL
+        if (imageUrl) {
+          const { error: updateError } = await supabase
+            .from('patients')
+            .update({ image_url: imageUrl })
+            .eq('id', patient.id);
+          
+          if (updateError) throw updateError;
+        }
+      }
 
       toast.success('Patient added successfully');
       setOpen(false);
@@ -75,6 +142,7 @@ export default function AddPatientDialog({ onPatientAdded }: AddPatientDialogPro
         oxygenSat: '',
         notes: ''
       });
+      removeImage();
 
       if (onPatientAdded) onPatientAdded();
     } catch (error) {
@@ -103,6 +171,50 @@ export default function AddPatientDialog({ onPatientAdded }: AddPatientDialogPro
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Patient Image Upload */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center space-x-2">
+              <User className="w-4 h-4" />
+              <span>Patient Photo</span>
+            </h3>
+            
+            <div className="space-y-4">
+              {imagePreview ? (
+                <div className="relative w-32 h-32 mx-auto">
+                  <img
+                    src={imagePreview}
+                    alt="Patient preview"
+                    className="w-32 h-32 object-cover rounded-lg border"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                    onClick={removeImage}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-2">Upload patient photo for AI tracking</p>
+                  <Label htmlFor="patient-image" className="cursor-pointer">
+                    <span className="text-primary hover:text-primary/80 font-medium">Choose file</span>
+                    <Input
+                      id="patient-image"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageChange}
+                    />
+                  </Label>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium flex items-center space-x-2">
