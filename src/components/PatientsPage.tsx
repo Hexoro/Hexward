@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { AddPatientDialog } from "./AddPatientDialog";
+import AddPatientDialog from "./AddPatientDialog";
 import VitalsRecordingDialog from "./VitalsRecordingDialog";
 import ConsultationBookingDialog from "./ConsultationBookingDialog";
 
