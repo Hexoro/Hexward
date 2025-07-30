@@ -455,7 +455,7 @@ This project is released as a **proof of concept** for demonstration purposes.
 
 Contact us today to discuss how we can customize this system for your specific hospital needs, ensuring seamless integration with your existing workflows and compliance with all relevant healthcare regulations.
 
-**[your-email@domain.com]** | **Schedule Demo** | **Request Quote**
+**ahmad.hussain.a301@gmail.com** 
 
 ---
 
