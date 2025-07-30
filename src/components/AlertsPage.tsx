@@ -1,79 +1,30 @@
 /**
- * Alerts and notifications page
+ * Alerts and notifications page - connected to Supabase
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AlertTriangle, Filter, Bell, Check, X, Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Alert {
   id: string;
   type: 'critical' | 'warning' | 'info';
   title: string;
   message: string;
-  timestamp: Date;
+  created_at: string;
   room: string;
-  patient?: string;
+  patient_id?: string;
   acknowledged: boolean;
   priority: number;
+  updated_at: string;
 }
 
-const mockAlerts: Alert[] = [
-  {
-    id: '1',
-    type: 'critical',
-    title: 'Patient Fall Detected',
-    message: 'Motion sensors detected a sudden fall in ICU-001. Immediate attention required.',
-    timestamp: new Date(Date.now() - 2 * 60 * 1000),
-    room: 'ICU-001',
-    patient: 'John Doe',
-    acknowledged: false,
-    priority: 1
-  },
-  {
-    id: '2',
-    type: 'critical',
-    title: 'Vital Signs Critical',
-    message: 'Heart rate dropped below threshold (45 bpm) for patient in ER-001.',
-    timestamp: new Date(Date.now() - 8 * 60 * 1000),
-    room: 'ER-001',
-    patient: 'Maria Garcia',
-    acknowledged: false,
-    priority: 1
-  },
-  {
-    id: '3',
-    type: 'warning',
-    title: 'Medication Overdue',
-    message: 'Scheduled medication for 14:00 has not been administered.',
-    timestamp: new Date(Date.now() - 15 * 60 * 1000),
-    room: 'WARD-101',
-    patient: 'Jane Smith',
-    acknowledged: true,
-    priority: 2
-  },
-  {
-    id: '4',
-    type: 'warning',
-    title: 'Equipment Maintenance',
-    message: 'Ventilator in ICU-002 requires scheduled maintenance check.',
-    timestamp: new Date(Date.now() - 30 * 60 * 1000),
-    room: 'ICU-002',
-    acknowledged: false,
-    priority: 2
-  },
-  {
-    id: '5',
-    type: 'info',
-    title: 'Visitor Check-in',
-    message: 'Visitor registered at main desk for patient in WARD-103.',
-    timestamp: new Date(Date.now() - 45 * 60 * 1000),
-    room: 'WARD-103',
-    patient: 'Robert Johnson',
-    acknowledged: true,
-    priority: 3
-  }
-];
+interface Patient {
+  id: string;
+  name: string;
+}
 
 const alertTypeConfig = {
   critical: {
@@ -94,24 +45,158 @@ const alertTypeConfig = {
 };
 
 export default function AlertsPage() {
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [patients, setPatients] = useState<{ [key: string]: Patient }>({});
+  const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'critical' | 'warning' | 'info'>('all');
   const [showAcknowledged, setShowAcknowledged] = useState(true);
+  const { toast } = useToast();
 
-  const filteredAlerts = mockAlerts
+  // Fetch alerts from Supabase
+  const fetchAlerts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('alerts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Type-cast the alerts to fix type mismatch
+      const typedAlerts: Alert[] = (data || []).map(alert => ({
+        ...alert,
+        type: alert.type as 'critical' | 'warning' | 'info'
+      }));
+      
+      setAlerts(typedAlerts);
+    } catch (error) {
+      console.error('Error fetching alerts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch alerts",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Fetch patients for alert mapping
+  const fetchPatients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id, name');
+
+      if (error) throw error;
+      
+      const patientsMap = (data || []).reduce((acc, patient) => {
+        acc[patient.id] = patient;
+        return acc;
+      }, {} as { [key: string]: Patient });
+      
+      setPatients(patientsMap);
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    }
+  };
+
+  // Acknowledge alert
+  const acknowledgeAlert = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('alerts')
+        .update({ 
+          acknowledged: true, 
+          acknowledged_at: new Date().toISOString(),
+          acknowledged_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Alert Acknowledged",
+        description: "Alert has been marked as acknowledged",
+      });
+
+      fetchAlerts(); // Refresh alerts
+    } catch (error) {
+      console.error('Error acknowledging alert:', error);
+      toast({
+        title: "Error",
+        description: "Failed to acknowledge alert",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Acknowledge all alerts
+  const acknowledgeAllAlerts = async () => {
+    try {
+      const unacknowledgedAlerts = filteredAlerts.filter(alert => !alert.acknowledged);
+      
+      const { error } = await supabase
+        .from('alerts')
+        .update({ 
+          acknowledged: true, 
+          acknowledged_at: new Date().toISOString(),
+          acknowledged_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .in('id', unacknowledgedAlerts.map(alert => alert.id));
+
+      if (error) throw error;
+
+      toast({
+        title: "All Alerts Acknowledged",
+        description: `${unacknowledgedAlerts.length} alerts have been acknowledged`,
+      });
+
+      fetchAlerts(); // Refresh alerts
+    } catch (error) {
+      console.error('Error acknowledging all alerts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to acknowledge all alerts",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const initData = async () => {
+      setLoading(true);
+      await Promise.all([fetchAlerts(), fetchPatients()]);
+      setLoading(false);
+    };
+
+    initData();
+
+    // Set up real-time subscription for alerts
+    const alertsChannel = supabase
+      .channel('alerts-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'alerts' }, 
+        () => {
+          fetchAlerts(); // Refresh alerts on any change
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(alertsChannel);
+    };
+  }, []);
+
+  const filteredAlerts = alerts
     .filter(alert => filterType === 'all' || alert.type === filterType)
     .filter(alert => showAcknowledged || !alert.acknowledged)
     .sort((a, b) => {
       if (a.acknowledged !== b.acknowledged) return a.acknowledged ? 1 : -1;
       if (a.priority !== b.priority) return a.priority - b.priority;
-      return b.timestamp.getTime() - a.timestamp.getTime();
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
-  const acknowledgeAlert = (id: string) => {
-    // In real app, would make API call
-    console.log('Acknowledging alert:', id);
-  };
-
-  const formatTimeAgo = (date: Date) => {
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
     const minutes = Math.floor((Date.now() - date.getTime()) / (1000 * 60));
     if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes}m ago`;
@@ -119,6 +204,17 @@ export default function AlertsPage() {
     if (hours < 24) return `${hours}h ago`;
     return `${Math.floor(hours / 24)}d ago`;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading alerts...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -129,7 +225,7 @@ export default function AlertsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Alerts</p>
-                <p className="text-2xl font-bold text-foreground">{mockAlerts.length}</p>
+                <p className="text-2xl font-bold text-foreground">{alerts.length}</p>
               </div>
               <Bell className="w-8 h-8 text-primary" />
             </div>
@@ -142,7 +238,7 @@ export default function AlertsPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Critical</p>
                 <p className="text-2xl font-bold text-destructive">
-                  {mockAlerts.filter(a => a.type === 'critical' && !a.acknowledged).length}
+                  {alerts.filter(a => a.type === 'critical' && !a.acknowledged).length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-destructive rounded-full flex items-center justify-center animate-pulse">
@@ -158,7 +254,7 @@ export default function AlertsPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Warnings</p>
                 <p className="text-2xl font-bold text-warning">
-                  {mockAlerts.filter(a => a.type === 'warning' && !a.acknowledged).length}
+                  {alerts.filter(a => a.type === 'warning' && !a.acknowledged).length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center">
@@ -214,7 +310,12 @@ export default function AlertsPage() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Active Alerts ({filteredAlerts.length})</span>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={acknowledgeAllAlerts}
+              disabled={filteredAlerts.filter(a => !a.acknowledged).length === 0}
+            >
               <Check className="w-4 h-4 mr-2" />
               Acknowledge All
             </Button>
@@ -224,6 +325,7 @@ export default function AlertsPage() {
           {filteredAlerts.map((alert) => {
             const config = alertTypeConfig[alert.type];
             const Icon = config.icon;
+            const patient = alert.patient_id ? patients[alert.patient_id] : null;
             
             return (
               <div
@@ -253,15 +355,15 @@ export default function AlertsPage() {
                       <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                         <div className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
-                          <span>{formatTimeAgo(alert.timestamp)}</span>
+                          <span>{formatTimeAgo(alert.created_at)}</span>
                         </div>
                         
                         <span>Room: {alert.room}</span>
                         
-                        {alert.patient && (
+                        {patient && (
                           <div className="flex items-center space-x-1">
                             <Users className="w-3 h-3" />
-                            <span>{alert.patient}</span>
+                            <span>{patient.name}</span>
                           </div>
                         )}
                       </div>

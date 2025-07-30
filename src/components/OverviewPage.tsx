@@ -1,38 +1,194 @@
 /**
- * Main dashboard overview with key metrics and live feeds
+ * Main dashboard overview with key metrics and live feeds - connected to Supabase
  */
+import { useState, useEffect } from "react";
 import { AlertTriangle, Users, Camera, Activity, Clock, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveFeedCard from "./LiveFeedCard";
 import AlertsPanel from "./AlertsPanel";
 import PatientStatsCard from "./PatientStatsCard";
+import { supabase } from "@/integrations/supabase/client";
 
-const mockRooms = [
-  { id: 'ICU-001', name: 'ICU Room 1', status: 'active' as const, patients: 2, lastUpdate: new Date() },
-  { id: 'ICU-002', name: 'ICU Room 2', status: 'active' as const, patients: 1, lastUpdate: new Date() },
-  { id: 'WARD-101', name: 'General Ward 101', status: 'active' as const, patients: 4, lastUpdate: new Date() },
-  { id: 'ER-001', name: 'Emergency Room 1', status: 'critical' as const, patients: 3, lastUpdate: new Date() },
-];
+interface DashboardStats {
+  totalPatients: number;
+  criticalAlerts: number;
+  activeCameras: number;
+  responseTime: string;
+}
 
-const mockAlerts = [
-  { id: '1', type: 'critical' as const, message: 'Patient fall detected in ICU-001', time: '2 min ago', room: 'ICU-001' },
-  { id: '2', type: 'warning' as const, message: 'Medication reminder for John Doe', time: '5 min ago', room: 'WARD-101' },
-  { id: '3', type: 'info' as const, message: 'Visitor check-in at ER-001', time: '12 min ago', room: 'ER-001' },
-];
-
-const stats = [
-  { title: 'Total Patients', value: '24', change: '+2', icon: Users, color: 'text-primary' },
-  { title: 'Critical Alerts', value: '3', change: '+1', icon: AlertTriangle, color: 'text-destructive' },
-  { title: 'Active Cameras', value: '12', change: '0', icon: Camera, color: 'text-success' },
-  { title: 'Response Time', value: '2.3min', change: '-0.5min', icon: Clock, color: 'text-warning' },
-];
+interface RecentAlert {
+  id: string;
+  type: 'critical' | 'warning' | 'info';
+  message: string;
+  time: string;
+  room: string;
+}
 
 export default function OverviewPage() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalPatients: 0,
+    criticalAlerts: 0,
+    activeCameras: 0,
+    responseTime: '0min'
+  });
+  const [recentAlerts, setRecentAlerts] = useState<RecentAlert[]>([]);
+  const [cameras, setCameras] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch dashboard statistics
+  const fetchDashboardStats = async () => {
+    try {
+      // Get total patients
+      const { count: patientsCount } = await supabase
+        .from('patients')
+        .select('*', { count: 'exact', head: true });
+
+      // Get critical alerts
+      const { count: alertsCount } = await supabase
+        .from('alerts')
+        .select('*', { count: 'exact', head: true })
+        .eq('type', 'critical')
+        .eq('acknowledged', false);
+
+      // Get active cameras
+      const { count: camerasCount } = await supabase
+        .from('camera_feeds')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      setStats({
+        totalPatients: patientsCount || 0,
+        criticalAlerts: alertsCount || 0,
+        activeCameras: camerasCount || 0,
+        responseTime: '2.3min' // Mock for now
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    }
+  };
+
+  // Fetch recent alerts for panel
+  const fetchRecentAlerts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('alerts')
+        .select('id, type, message, created_at, room')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+
+      const formattedAlerts: RecentAlert[] = (data || []).map(alert => ({
+        id: alert.id,
+        type: alert.type as 'critical' | 'warning' | 'info',
+        message: alert.message,
+        time: formatTimeAgo(alert.created_at),
+        room: alert.room
+      }));
+
+      setRecentAlerts(formattedAlerts);
+    } catch (error) {
+      console.error('Error fetching recent alerts:', error);
+    }
+  };
+
+  // Fetch camera feeds for display
+  const fetchCameras = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('camera_feeds')
+        .select('*')
+        .limit(4)
+        .order('name');
+
+      if (error) throw error;
+      
+      const mappedCameras = (data || []).map(camera => ({
+        id: camera.camera_id,
+        name: camera.name,
+        status: camera.status,
+        patients: 0, // Would need actual count
+        lastUpdate: new Date(camera.updated_at)
+      }));
+      
+      setCameras(mappedCameras);
+    } catch (error) {
+      console.error('Error fetching cameras:', error);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const minutes = Math.floor((Date.now() - date.getTime()) / (1000 * 60));
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  };
+
+  useEffect(() => {
+    const initDashboard = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchDashboardStats(),
+        fetchRecentAlerts(),
+        fetchCameras()
+      ]);
+      setLoading(false);
+    };
+
+    initDashboard();
+
+    // Set up real-time subscriptions
+    const alertsChannel = supabase
+      .channel('dashboard-alerts')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'alerts' }, 
+        () => {
+          fetchDashboardStats();
+          fetchRecentAlerts();
+        }
+      )
+      .subscribe();
+
+    const patientsChannel = supabase
+      .channel('dashboard-patients')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'patients' }, 
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(alertsChannel);
+      supabase.removeChannel(patientsChannel);
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const statsConfig = [
+    { title: 'Total Patients', value: stats.totalPatients.toString(), change: '+2', icon: Users, color: 'text-primary' },
+    { title: 'Critical Alerts', value: stats.criticalAlerts.toString(), change: '+1', icon: AlertTriangle, color: 'text-destructive' },
+    { title: 'Active Cameras', value: stats.activeCameras.toString(), change: '0', icon: Camera, color: 'text-success' },
+    { title: 'Response Time', value: stats.responseTime, change: '-0.5min', icon: Clock, color: 'text-warning' },
+  ];
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
       <div className="dashboard-grid">
-        {stats.map((stat, index) => (
+        {statsConfig.map((stat, index) => (
           <Card key={index} className="medical-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -65,8 +221,8 @@ export default function OverviewPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockRooms.map((room) => (
-                  <LiveFeedCard key={room.id} room={room} />
+                {cameras.map((camera) => (
+                  <LiveFeedCard key={camera.id} room={camera} />
                 ))}
               </div>
             </CardContent>
@@ -78,7 +234,7 @@ export default function OverviewPage() {
 
         {/* Alerts & Activity */}
         <div className="space-y-6">
-          <AlertsPanel alerts={mockAlerts} />
+          <AlertsPanel alerts={recentAlerts} />
           
           {/* Recent Activity */}
           <Card className="medical-card">

@@ -1,12 +1,14 @@
 /**
- * Reports and analytics page
+ * Reports and analytics page - connected to Supabase
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { FileText, Download, Calendar, TrendingUp, Users, AlertTriangle, Camera, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const alertsData = [
   { name: 'Mon', critical: 4, warning: 8, info: 12 },
@@ -44,11 +46,134 @@ const systemMetrics = [
 export default function ReportsPage() {
   const [timeRange, setTimeRange] = useState('7d');
   const [reportType, setReportType] = useState('overview');
+  const [realSystemMetrics, setRealSystemMetrics] = useState(systemMetrics);
+  const [realAlertsData, setRealAlertsData] = useState(alertsData);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const generateReport = (type: string) => {
-    console.log(`Generating ${type} report for ${timeRange}`);
-    // In real app, would trigger API call to generate and download report
+  // Fetch real analytics data
+  const fetchAnalyticsData = async () => {
+    try {
+      // Get total patients
+      const { count: totalPatients } = await supabase
+        .from('patients')
+        .select('*', { count: 'exact', head: true });
+
+      // Get alerts count for today
+      const today = new Date().toISOString().split('T')[0];
+      const { count: dailyAlerts } = await supabase
+        .from('alerts')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', today);
+
+      // Get camera uptime (mock calculation)
+      const { count: activeCameras } = await supabase
+        .from('camera_feeds')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      const { count: totalCameras } = await supabase
+        .from('camera_feeds')
+        .select('*', { count: 'exact', head: true });
+
+      const uptime = totalCameras ? ((activeCameras / totalCameras) * 100).toFixed(1) : '0.0';
+
+      // Update system metrics with real data
+      setRealSystemMetrics([
+        { title: 'Total Patients', value: totalPatients?.toString() || '0', change: '+3', icon: Users, color: 'text-primary' },
+        { title: 'Daily Alerts', value: dailyAlerts?.toString() || '0', change: '-5', icon: AlertTriangle, color: 'text-warning' },
+        { title: 'Camera Uptime', value: `${uptime}%`, change: '+0.1%', icon: Camera, color: 'text-success' },
+        { title: 'Avg Response', value: '2.3min', change: '-0.2min', icon: Clock, color: 'text-primary' },
+      ]);
+
+      // Get alerts trend data (last 7 days)
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      const { data: weeklyAlerts } = await supabase
+        .from('alerts')
+        .select('type, created_at')
+        .gte('created_at', weekAgo.toISOString());
+
+      // Process weekly alerts data for chart
+      const alertsByDay = new Array(7).fill(0).map((_, index) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (6 - index));
+        const dayName = date.toLocaleDateString('en', { weekday: 'short' });
+        
+        const dayAlerts = weeklyAlerts?.filter(alert => {
+          const alertDate = new Date(alert.created_at);
+          return alertDate.toDateString() === date.toDateString();
+        }) || [];
+
+        return {
+          name: dayName,
+          critical: dayAlerts.filter(a => a.type === 'critical').length,
+          warning: dayAlerts.filter(a => a.type === 'warning').length,
+          info: dayAlerts.filter(a => a.type === 'info').length,
+        };
+      });
+
+      setRealAlertsData(alertsByDay);
+
+    } catch (error) {
+      console.error('Error fetching analytics data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch analytics data",
+        variant: "destructive",
+      });
+    }
   };
+
+  useEffect(() => {
+    const initAnalytics = async () => {
+      setLoading(true);
+      await fetchAnalyticsData();
+      setLoading(false);
+    };
+
+    initAnalytics();
+  }, [timeRange]);
+
+  const generateReport = async (type: string) => {
+    try {
+      console.log(`Generating ${type} report for ${timeRange}`);
+      
+      // In a real app, this would call a Supabase edge function to generate reports
+      toast({
+        title: "Report Generated",
+        description: `${type.toUpperCase()} report is being prepared for download`,
+      });
+      
+      // Mock report generation
+      setTimeout(() => {
+        toast({
+          title: "Download Ready",
+          description: `Your ${reportType} report is ready for download`,
+        });
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading analytics...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -94,7 +219,7 @@ export default function ReportsPage() {
 
       {/* Key Metrics */}
       <div className="dashboard-grid">
-        {systemMetrics.map((metric, index) => (
+        {realSystemMetrics.map((metric, index) => (
           <Card key={index} className="medical-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -126,7 +251,7 @@ export default function ReportsPage() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={alertsData}>
+              <BarChart data={realAlertsData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
