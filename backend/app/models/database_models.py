@@ -60,6 +60,7 @@ class Camera(Base):
     room = Column(String, nullable=False, index=True)
     camera_index = Column(Integer)  # For local cameras
     rtsp_url = Column(String)  # For IP cameras
+    camera_type = Column(String, default="usb")  # usb, ip, raspberry_pi
     status = Column(String, default="active")  # active, offline, maintenance
     last_frame_time = Column(DateTime(timezone=True))
     detection_enabled = Column(Boolean, default=True)

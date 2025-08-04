@@ -11,6 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import CameraSettingsPage from "./CameraSettingsPage";
+import BackendStatusIndicator from "./BackendStatusIndicator";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -88,12 +90,20 @@ export default function SettingsPage() {
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="ai">AI & Processing</TabsTrigger>
           <TabsTrigger value="cameras">Cameras</TabsTrigger>
+          <TabsTrigger value="ai">AI & Processing</TabsTrigger>
           <TabsTrigger value="alerts">Alerts</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="network">Network</TabsTrigger>
         </TabsList>
+
+        {/* Camera Management */}
+        <TabsContent value="cameras">
+          <div className="space-y-6">
+            <CameraSettingsPage />
+            <BackendStatusIndicator />
+          </div>
+        </TabsContent>
 
         {/* General Settings */}
         <TabsContent value="general">

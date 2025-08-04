@@ -13,7 +13,7 @@ import uvicorn
 
 from app.config import get_settings
 from app.database import engine, Base, get_db
-from app.routers import patients, alerts, cameras, auth, analytics
+from app.routers import patients, alerts, cameras, auth, analytics, ip_cameras
 from app.services.ai_monitor import AIMonitorService
 from app.services.websocket_manager import WebSocketManager
 from app.services.camera_service import CameraService
@@ -74,6 +74,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(patients.router, prefix="/api/patients", tags=["Patients"])
 app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"])
 app.include_router(cameras.router, prefix="/api/cameras", tags=["Cameras"])
+app.include_router(ip_cameras.router, prefix="/api/ip-cameras", tags=["IP Cameras"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
 
 # Serve static files (for uploaded images, etc.)
