@@ -4,10 +4,13 @@
 import { useState, useEffect } from "react";
 import { AlertTriangle, Users, Camera, Activity, Clock, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import LiveFeedCard from "./LiveFeedCard";
 import AlertsPanel from "./AlertsPanel";
 import PatientStatsCard from "./PatientStatsCard";
+import RoomTemperatureWidget from "./RoomTemperatureWidget";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardStats {
   totalPatients: number;
@@ -24,7 +27,11 @@ interface RecentAlert {
   room: string;
 }
 
-export default function OverviewPage() {
+interface OverviewPageProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function OverviewPage({ onNavigate }: OverviewPageProps) {
   const [stats, setStats] = useState<DashboardStats>({
     totalPatients: 0,
     criticalAlerts: 0,
@@ -214,9 +221,18 @@ export default function OverviewPage() {
         <div className="lg:col-span-2 space-y-6">
           <Card className="medical-card">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Camera className="w-5 h-5" />
-                <span>Live Room Monitoring</span>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Camera className="w-5 h-5" />
+                  <span>Live Room Monitoring</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onNavigate?.('feeds')}
+                >
+                  View All
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -229,19 +245,70 @@ export default function OverviewPage() {
           </Card>
 
           {/* Patient Statistics */}
-          <PatientStatsCard />
+          <div className="space-y-6">
+            <Card className="medical-card">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-5 h-5" />
+                    <span>Patient Overview</span>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => onNavigate?.('patients')}
+                  >
+                    View All
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PatientStatsCard />
+              </CardContent>
+            </Card>
+            
+            <RoomTemperatureWidget />
+          </div>
         </div>
 
         {/* Alerts & Activity */}
         <div className="space-y-6">
-          <AlertsPanel alerts={recentAlerts} />
+          <Card className="medical-card">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  <span>Recent Alerts</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onNavigate?.('alerts')}
+                >
+                  View All
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AlertsPanel alerts={recentAlerts} />
+            </CardContent>
+          </Card>
           
           {/* Recent Activity */}
           <Card className="medical-card">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="w-5 h-5" />
-                <span>Recent Activity</span>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Activity className="w-5 h-5" />
+                  <span>Recent Activity</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onNavigate?.('reports')}
+                >
+                  View All
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>

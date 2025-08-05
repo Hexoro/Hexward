@@ -156,6 +156,10 @@ export default function LiveFeedsPage() {
             Record All
           </Button>
           <Button variant="outline" size="sm">
+            <Volume2 className="w-4 h-4 mr-2" />
+            Audio
+          </Button>
+          <Button variant="outline" size="sm">
             <Settings className="w-4 h-4" />
           </Button>
         </div>

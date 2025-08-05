@@ -2,7 +2,7 @@
  * Patients management page
  */
 import { useState, useEffect } from "react";
-import { Users, Search, Eye, Edit, Calendar, Clock } from "lucide-react";
+import { Users, Search, Eye, Edit, Calendar, Clock, Activity, FileText, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ import { toast } from "sonner";
 import AddPatientDialog from "./AddPatientDialog";
 import VitalsRecordingDialog from "./VitalsRecordingDialog";
 import ConsultationBookingDialog from "./ConsultationBookingDialog";
+import PatientVitalsDialog from "./PatientVitalsDialog";
+import PatientReportsDialog from "./PatientReportsDialog";
+import MedicationScheduleDialog from "./MedicationScheduleDialog";
 
 interface Patient {
   id: string;
@@ -38,6 +41,8 @@ export default function PatientsPage() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [vitalsDialogOpen, setVitalsDialogOpen] = useState(false);
+  const [reportsDialogOpen, setReportsDialogOpen] = useState(false);
 
   const fetchPatients = async () => {
     try {
@@ -161,9 +166,30 @@ export default function PatientsPage() {
                         }`}>
                           {patient.status || 'unknown'}
                         </span>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <div className="flex space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setVitalsDialogOpen(true);
+                              setSelectedPatient(patient);
+                            }}
+                          >
+                            <Activity className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReportsDialogOpen(true);
+                              setSelectedPatient(patient);
+                            }}
+                          >
+                            <FileText className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
 
@@ -304,7 +330,37 @@ export default function PatientsPage() {
                   )}
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-4 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setVitalsDialogOpen(true)}
+                      className="flex-1"
+                    >
+                      <Activity className="w-4 h-4 mr-2" />
+                      Vitals
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setReportsDialogOpen(true)}
+                      className="flex-1"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Reports
+                    </Button>
+                  </div>
+                  <MedicationScheduleDialog 
+                    patientId={selectedPatient.id} 
+                    patientName={selectedPatient.name}
+                    trigger={
+                      <Button size="sm" className="w-full">
+                        <Bell className="w-4 h-4 mr-2" />
+                        Medication Schedule
+                      </Button>
+                    }
+                  />
                   <Button className="w-full medical-button">
                     <Calendar className="w-4 h-4 mr-2" />
                     View Timeline
@@ -322,6 +378,24 @@ export default function PatientsPage() {
           )}
         </div>
       </div>
+
+      {/* Dialogs */}
+      {selectedPatient && (
+        <>
+          <PatientVitalsDialog
+            isOpen={vitalsDialogOpen}
+            onClose={() => setVitalsDialogOpen(false)}
+            patientId={selectedPatient.id}
+            patientName={selectedPatient.name}
+          />
+          <PatientReportsDialog
+            isOpen={reportsDialogOpen}
+            onClose={() => setReportsDialogOpen(false)}
+            patientId={selectedPatient.id}
+            patientName={selectedPatient.name}
+          />
+        </>
+      )}
     </div>
   );
 }
