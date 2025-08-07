@@ -6,27 +6,15 @@ import { backendApi } from '@/services/backendApi';
 import { useWebSocket } from './useWebSocket';
 
 interface SystemStatus {
-  timestamp: string;
+  status: string;
   services: {
-    ai_monitor: {
-      running: boolean;
-      detections_count: number;
-      last_analysis: string;
-    };
-    camera_service: {
-      running: boolean;
-      active_cameras: number;
-      total_cameras: number;
-    };
-    gpt_service: {
-      available: boolean;
-      last_summary: string;
-    };
+    camera_service: string;
+    ai_service: string;
+    database: string;
+    edge_functions?: string;
   };
-  hospital: {
-    name: string;
-    timezone: string;
-  };
+  timestamp: string;
+  error?: string;
 }
 
 export const useBackendConnection = () => {
@@ -47,12 +35,13 @@ export const useBackendConnection = () => {
     try {
       const response = await backendApi.getSystemStatus();
       if (response.success && response.data) {
-        setSystemStatus(response.data as SystemStatus);
+        setSystemStatus(response.data);
         setIsConnected(true);
         setError(null);
       } else {
         setIsConnected(false);
-        setError(response.error || 'Failed to connect to backend');
+        const errorMsg = (response as any).error || 'Failed to connect to backend';
+        setError(errorMsg);
       }
     } catch (err) {
       setIsConnected(false);
@@ -104,29 +93,12 @@ export const useBackendConnection = () => {
     return () => clearInterval(interval);
   }, [checkConnection]);
 
-  // Handle WebSocket messages
+  // Handle WebSocket messages (simplified since we're using Supabase edge functions)
   useEffect(() => {
     if (lastMessage) {
       try {
         const data = JSON.parse(lastMessage.data);
-        
-        // Handle different message types
-        switch (data.type) {
-          case 'detection':
-            // New AI detection
-            console.log('New detection:', data);
-            break;
-          case 'alert':
-            // New alert generated
-            console.log('New alert:', data);
-            break;
-          case 'system_status':
-            // System status update
-            setSystemStatus(data.status);
-            break;
-          default:
-            console.log('Unknown message type:', data);
-        }
+        console.log('WebSocket message received:', data);
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error);
       }

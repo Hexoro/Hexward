@@ -167,10 +167,11 @@ export default function CameraSettingsPage() {
   const addCamera = async (camera: DetectedCamera) => {
     try {
       const response = await backendApi.addIpCamera({
-        ip: camera.ip,
-        name: `Camera ${camera.ip}`,
-        room: 'General Ward',
-        rtsp_url: camera.rtsp_url
+        ip_address: camera.ip,
+        port: camera.port,
+        brand: camera.brand,
+        rtsp_url: camera.rtsp_url,
+        room: 'General Ward'
       });
 
       if (response.success) {
@@ -206,7 +207,13 @@ export default function CameraSettingsPage() {
     }
 
     try {
-      const response = await backendApi.addIpCamera(addCameraForm);
+      const response = await backendApi.addIpCamera({
+        ip_address: addCameraForm.ip,
+        rtsp_url: addCameraForm.rtsp_url,
+        username: addCameraForm.username,
+        password: addCameraForm.password,
+        room: addCameraForm.room
+      });
 
       if (response.success) {
         toast({

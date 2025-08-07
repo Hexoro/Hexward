@@ -32,7 +32,7 @@ const navigation = [
   { name: 'Cameras', id: 'cameras', icon: Camera, roles: ['doctor', 'nurse', 'admin'] },
   { name: 'Alerts', id: 'alerts', icon: AlertTriangle, roles: ['doctor', 'nurse', 'admin'] },
   { name: 'Reports', id: 'reports', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
-  { name: 'Settings', id: 'settings', icon: Settings, roles: ['doctor', 'nurse', 'admin'] },
+  { name: 'Settings', id: 'settings', icon: Settings, roles: ['admin'] },
 ];
 
 const roleColors = {

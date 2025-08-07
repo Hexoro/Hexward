@@ -157,6 +157,51 @@ export type Database = {
         }
         Relationships: []
       }
+      camera_config: {
+        Row: {
+          brand: string | null
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          model: string | null
+          password: string | null
+          port: number | null
+          room: string | null
+          rtsp_url: string | null
+          status: string | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address: unknown
+          model?: string | null
+          password?: string | null
+          port?: number | null
+          room?: string | null
+          rtsp_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          model?: string | null
+          password?: string | null
+          port?: number | null
+          room?: string | null
+          rtsp_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
       camera_feeds: {
         Row: {
           ai_monitoring_enabled: boolean | null
