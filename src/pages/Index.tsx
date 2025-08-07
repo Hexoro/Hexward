@@ -11,9 +11,10 @@ import LiveFeedsPage from "@/components/LiveFeedsPage";
 import AlertsPage from "@/components/AlertsPage";
 import ReportsPage from "@/components/ReportsPage";
 import SettingsPage from "@/components/SettingsPage";
+import CameraSettingsPage from "@/components/CameraSettingsPage";
 import { Loader2 } from "lucide-react";
 
-type Page = 'overview' | 'patients' | 'feeds' | 'alerts' | 'reports' | 'settings';
+type Page = 'overview' | 'patients' | 'feeds' | 'cameras' | 'alerts' | 'reports' | 'settings';
 
 const Index = () => {
   const { profile, loading } = useAuth();
@@ -42,6 +43,8 @@ const Index = () => {
         return <PatientsPage />;
       case 'feeds':
         return <LiveFeedsPage />;
+      case 'cameras':
+        return <CameraSettingsPage />;
       case 'alerts':
         return <AlertsPage />;
       case 'reports':

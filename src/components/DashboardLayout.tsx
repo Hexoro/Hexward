@@ -28,10 +28,11 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: 'Overview', id: 'overview', icon: Activity, roles: ['doctor', 'nurse', 'admin'] },
   { name: 'Patients', id: 'patients', icon: Users, roles: ['doctor', 'nurse', 'admin'] },
-  { name: 'Live Feeds', id: 'feeds', icon: Camera, roles: ['doctor', 'nurse', 'admin'] },
+  { name: 'Live Feeds', id: 'feeds', icon: Eye, roles: ['doctor', 'nurse', 'admin'] },
+  { name: 'Cameras', id: 'cameras', icon: Camera, roles: ['doctor', 'nurse', 'admin'] },
   { name: 'Alerts', id: 'alerts', icon: AlertTriangle, roles: ['doctor', 'nurse', 'admin'] },
-  { name: 'Reports', id: 'reports', icon: FileText, roles: ['doctor', 'admin'] },
-  { name: 'Settings', id: 'settings', icon: Settings, roles: ['admin'] },
+  { name: 'Reports', id: 'reports', icon: FileText, roles: ['doctor', 'nurse', 'admin'] },
+  { name: 'Settings', id: 'settings', icon: Settings, roles: ['doctor', 'nurse', 'admin'] },
 ];
 
 const roleColors = {
