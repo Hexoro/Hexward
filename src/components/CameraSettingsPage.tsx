@@ -76,8 +76,12 @@ export default function CameraSettingsPage() {
     try {
       const response = await backendApi.getCameras();
       if (response.success && response.data) {
-        setCamerasConfig(response.data as CameraConfig[]);
+        const data = response.data as CameraConfig[];
+        // Ensure we always set an array
+        setCamerasConfig(Array.isArray(data) ? data : []);
       } else {
+        // Set empty array on failure
+        setCamerasConfig([]);
         toast({
           title: "Error",
           description: "Failed to load camera configurations",
@@ -86,6 +90,8 @@ export default function CameraSettingsPage() {
       }
     } catch (error) {
       console.error('Error loading cameras:', error);
+      // Set empty array on error
+      setCamerasConfig([]);
     } finally {
       setLoading(false);
     }
